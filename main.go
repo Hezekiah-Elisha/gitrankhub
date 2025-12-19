@@ -22,5 +22,7 @@ func main() {
 		})
 	})
 
+	router.POST("/login", handlers.LoginUser)
+
 	router.Run(":8080")
 }
