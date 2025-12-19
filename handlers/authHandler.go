@@ -52,13 +52,6 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 }
 
 func VerifyToken(tokenString string) (bool, error) {
-	// return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-	// 	// validate the alg is what you expect
-	// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 		return nil, jwt.ErrSignatureInvalid
-	// 	}
-	// 	return []byte(secretKey), nil
-	// })
 	token, err := ParseToken(tokenString)
 	if err != nil {
 		return false, err
