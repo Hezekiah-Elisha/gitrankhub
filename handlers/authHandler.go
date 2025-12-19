@@ -42,6 +42,15 @@ func createToken(userID string) (string, error) {
 	return tokenString, err
 }
 
+func ParseToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
+}
+
 func VerifyToken(tokenString string) (bool, error) {
 	// return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 	// 	// validate the alg is what you expect
@@ -50,26 +59,31 @@ func VerifyToken(tokenString string) (bool, error) {
 	// 	}
 	// 	return []byte(secretKey), nil
 	// })
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	})
+	token, err := ParseToken(tokenString)
+	if err != nil {
+		return false, err
+	}
 
 	return token.Valid, err
 }
 
 // extractTokenUserID extracts the user ID from the JWT token claims
-func ExtractTokenUserID(accessToken *jwt.Token) (string, error) {
+func ExtractTokenUserID(tokenString string) (string, error) {
+	accessToken, err := ParseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
 	claims, ok := accessToken.Claims.(jwt.MapClaims)
 	if !ok || !accessToken.Valid {
 		return "", jwt.ErrSignatureInvalid
 	}
+
 	userID, ok := claims["user_id"].(string)
 	if !ok {
 		return "", jwt.ErrSignatureInvalid
 	}
+
 	return userID, nil
 }
 

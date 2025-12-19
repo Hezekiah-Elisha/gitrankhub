@@ -20,10 +20,10 @@ func main() {
 	{
 		// Protected routes can be added here with middleware if needed
 		userRoutes.GET("/", middlewares.AuthMiddleware(), handlers.GetUsers)
-		userRoutes.POST("/", handlers.CreateUser)
-		userRoutes.GET("/:id", handlers.GetUserByID)
-		userRoutes.GET("/email/:email", handlers.GetUserByEmail)
-		userRoutes.PUT("/:id", handlers.UpdateUser)
+		userRoutes.POST("/", middlewares.AuthMiddleware(), handlers.CreateUser)
+		userRoutes.GET("/:id", middlewares.AuthMiddleware(), handlers.GetUserByID)
+		userRoutes.GET("/email/:email", middlewares.AuthMiddleware(), handlers.GetUserByEmail)
+		userRoutes.PUT("/:id", middlewares.AuthMiddleware(), handlers.UpdateUser)
 	}
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
