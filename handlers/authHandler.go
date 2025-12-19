@@ -47,7 +47,7 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
-		return []byte(os.Getenv("SECRET_KEY")), nil
+		return []byte(secretKey), nil
 	})
 }
 
