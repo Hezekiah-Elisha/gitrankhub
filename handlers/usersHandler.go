@@ -4,6 +4,7 @@ import (
 	"context"
 	"gitrankhub/config"
 	"gitrankhub/models"
+	sqlfunctions "gitrankhub/sqlFunctions"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,9 +22,9 @@ var ctx = context.Background()
 func GetUsers(c *gin.Context) {
 	var users []models.User
 
-	result := config.ConnectDB().Find(&users)
-	if result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+	users, err := sqlfunctions.GetAllUsers()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.IndentedJSON(200, users)
@@ -49,12 +50,11 @@ func CreateUser(c *gin.Context) {
 func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 
-	user, err := gorm.G[models.User](config.ConnectDB()).
-		Where("id = ?", id).
-		First(ctx)
-
+	user, err := sqlfunctions.GetUserByID(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -64,13 +64,10 @@ func GetUserByID(c *gin.Context) {
 func GetUserByEmail(c *gin.Context) {
 	email := c.Param("email")
 
-	user, err := gorm.G[models.User](config.ConnectDB()).
-		Where("email = ?", email).
-		First(ctx)
-
+	user, err := sqlfunctions.GetUserByEmail(email)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{
-			"error": "user not found",
+			"error": err.Error(),
 		})
 		return
 	}
